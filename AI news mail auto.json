@@ -1,0 +1,190 @@
+{
+  "name": "My workflow 3",
+  "nodes": [
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "triggerAtHour": 9
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.4,
+      "position": [
+        32,
+        112
+      ],
+      "id": "a52807a8-39d6-4d05-9ecf-ddfd71cfe156",
+      "name": "Schedule Trigger"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "={{ $json.data }}",
+        "messages": {
+          "messageValues": [
+            {
+              "type": "HumanMessagePromptTemplate",
+              "message": "=You are a professional AI news editor and research summarizer.  Your task is to analyze the news/article content provided below and convert it into a clear, accurate, structured news summary.  IMPORTANT RULES: 1. Use ONLY the information available in the provided article/content. 2. Do not invent, assume, or add facts that are not present. 3. Do not change the meaning of the original information. 4. Clearly separate facts from opinions or predictions. 5. Remove unnecessary repetition, filler, advertisements, and irrelevant details. 6. Keep the language simple, professional, and easy to understand. 7. Preserve important names, organizations, dates, numbers, statistics, and technical terms accurately. 8. If a piece of information is not available, write \"Not mentioned\" instead of guessing. 9. Focus on what happened, why it matters, and the key takeaway. 10. Do not include your own personal opinion.  ANALYZE THE FOLLOWING ARTICLE: RETURN THE RESULT IN EXACTLY THIS STRUCTURE:{{ $json.data }}  {   \"headline\": \"A clear and concise headline\",   \"category\": \"AI / Technology / Business / Science / Startups / Cybersecurity / Other\",   \"summary\": \"A 2-4 sentence summary explaining the main story.\",   \"key_points\": [     \"Important point 1\",     \"Important point 2\",     \"Important point 3\",     \"Important point 4\"   ],   \"why_it_matters\": \"Explain why this news is important and who could be affected.\",   \"companies_or_people_mentioned\": [     \"Name 1\",     \"Name 2\"   ],   \"important_numbers\": [     \"Relevant statistic, amount, percentage, date, or other number\"   ],   \"source\": \"Source name if available\",   \"published_date\": \"Publication date if available\",   \"sentiment\": \"Positive / Negative / Neutral / Mixed\",   \"one_line_takeaway\": \"The entire story explained in one clear sentence.\" }  OUTPUT REQUIREMENTS: - Return valid JSON only. - Do not use Markdown. - Do not add explanations before or after the JSON. - Do not use ``` code fences. - Keep the summary concise but informative. - Ensure all JSON strings are properly escaped."
+            }
+          ]
+        },
+        "batching": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.chainLlm",
+      "typeVersion": 1.9,
+      "position": [
+        400,
+        -64
+      ],
+      "id": "80c0effa-75ed-42ce-8bc5-a6747ac229ed",
+      "name": "Basic LLM Chain"
+    },
+    {
+      "parameters": {
+        "aggregate": "aggregateAllItemData",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.aggregate",
+      "typeVersion": 1,
+      "position": [
+        192,
+        -64
+      ],
+      "id": "809c2e5d-7687-46c6-87fc-30fa03d80f27",
+      "name": "Aggregate"
+    },
+    {
+      "parameters": {
+        "url": "https://feeds.feedburner.com/TheHackersNews",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.rssFeedRead",
+      "typeVersion": 1.2,
+      "position": [
+        -16,
+        -64
+      ],
+      "id": "fc3f3469-b53a-47be-93de-c6ead2ad14b7",
+      "name": "ai news"
+    },
+    {
+      "parameters": {
+        "modelName": "models/gemini-3.5-flash",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
+      "typeVersion": 1.1,
+      "position": [
+        256,
+        160
+      ],
+      "id": "446616bd-4131-46e7-9178-b87ceff9224d",
+      "name": "Google Gemini Chat Model",
+      "credentials": {
+        "googlePalmApi": {
+          "id": "5G8U90linwu7GHWW",
+          "name": "Google Gemini(PaLM) Api account 3"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "sendTo": "pothudheeraj04@gmail.com",
+        "subject": "latest ai news",
+        "emailType": "text",
+        "message": "={{ $json.text }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.2,
+      "position": [
+        768,
+        -64
+      ],
+      "id": "2c484c74-d937-4b88-94bd-ba344251c3fa",
+      "name": "Send a message",
+      "webhookId": "aa40e011-168e-476e-8ebf-dbb5ae23753e",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "FNqTs1z4xOudEyQ9",
+          "name": "Gmail account"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Schedule Trigger": {
+      "main": [
+        [
+          {
+            "node": "ai news",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Aggregate": {
+      "main": [
+        [
+          {
+            "node": "Basic LLM Chain",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "ai news": {
+      "main": [
+        [
+          {
+            "node": "Aggregate",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Gemini Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Basic LLM Chain",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Basic LLM Chain": {
+      "main": [
+        [
+          {
+            "node": "Send a message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate"
+  },
+  "versionId": "90d9b267-e62d-4a1b-af60-b6a9fe3b627c",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "7bcfe3a86cbd61748b7f164c2f34e88d99e2e5f605c4b3f5bcf00254ef1ed2d2"
+  },
+  "nodeGroups": [],
+  "id": "N43UFO26lTAPypmv",
+  "tags": []
+}
