@@ -1,5 +1,4 @@
-# AI-news-mail-automation
-AI-powered n8n automation that collects AI &amp; tech news, summarizes articles using Google Gemini, structures key insights, and delivers personalized news updates via email.
+
 # 🤖 AI News Email Automation
 
 AI News Email Automation is an AI-powered workflow designed to automatically collect, summarize, structure, and deliver the latest AI and technology news through email. The project uses workflow automation and Generative AI to reduce the time and effort required to manually read and track multiple news articles.
